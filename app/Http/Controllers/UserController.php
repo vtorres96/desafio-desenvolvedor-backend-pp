@@ -39,12 +39,12 @@ class UserController extends Controller
             $response = $this->userService->create($data);
 
             return response()->json(
-                ['data' => $response],
+                $response,
                 Response::HTTP_OK
             );
         } catch (\Exception $exception) {
             return response()->json(
-                ['message' => 'Falha ao processar requisição'],
+                ['message' => $exception->getMessage()],
                 Response::HTTP_BAD_REQUEST
             );
         }
