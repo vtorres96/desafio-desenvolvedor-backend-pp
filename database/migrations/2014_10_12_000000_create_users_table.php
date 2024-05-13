@@ -19,6 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('cpf_cnpj')->unique();
             $table->string('email')->unique();
             $table->enum('type', ['common', 'shopkeeper'])->default('common');
+            $table->decimal('balance', 10, 2)->default(0.00);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
