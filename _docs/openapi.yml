@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: Documentação da API PP
+  version: 1.0.0
+paths:
+  /user/:
+    post:
+      summary: Criar usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                cpf_cnpj:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                type:
+                  type: string
+                  enum: ['common', 'shopkeeper']
+                balance:
+                  type: string
+      responses:
+        '204':
+          description: Sucesso. O usuário foi criado com sucesso.
+  /user/{id}:
+    get:
+      summary: Obter usuário por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID do usuário a ser obtido
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Sucesso. Retorna os dados do usuário.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      cpf_cnpj:
+                        type: string
+                      email:
+                        type: string
+                      type:
+                        type: string
+                      balance:
+                        type: string
+                      email_verified_at:
+                        type: string
+                        format: date-time
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+        '404':
+          description: Não encontrado. O usuário com o ID especificado não foi encontrado.
