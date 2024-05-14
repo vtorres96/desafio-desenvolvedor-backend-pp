@@ -80,7 +80,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'pt_BR',
 
     /*
     |--------------------------------------------------------------------------
@@ -167,6 +167,7 @@ return [
          */
         App\Providers\PaymentServiceProvider::class,
         App\Providers\UserServiceProvider::class,
+        App\Providers\Payment\AuthorizerServiceProvider::class,
 
         /*
          * Application Service Providers...

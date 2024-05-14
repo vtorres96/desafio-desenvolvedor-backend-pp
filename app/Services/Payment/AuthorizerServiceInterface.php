@@ -1,18 +1,20 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Payment;
+
+use Exception;
 
 /**
- * Interface PaymentServiceInterface
- * @package   App\Services
+ * Interface AuthorizerServiceInterface
+ * @package   App\Services\Payment
  * @author    Victor Torres <victorcdc96@gmail.com>
  * @copyright PP <www.pp.com.br>
  */
-interface PaymentServiceInterface
+interface AuthorizerServiceInterface
 {
     /**
-     * @param array $data
-     * @return array
+     * @return boolean
+     * @throws Exception
      */
-    public function create(array $data): array;
+    public function checkTransactionIsAuthorized(): bool;
 }

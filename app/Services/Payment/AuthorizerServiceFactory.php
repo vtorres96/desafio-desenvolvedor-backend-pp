@@ -1,31 +1,20 @@
 <?php
 
-namespace App\Services;
-
-use App\Repositories\PaymentRepositoryInterface;
+namespace App\Services\Payment;
 
 /**
- * Class PaymentServiceFactory
- * @package   App\Services
+ * Class AuthorizerServiceFactory
+ * @package   App\Services\Payment
  * @author    Victor Torres <victorcdc96@gmail.com>
  * @copyright PP <www.pp.com.br>
  */
-class PaymentServiceFactory
+class AuthorizerServiceFactory
 {
     /**
-     * @return \App\Services\PaymentService
+     * @return \App\Services\Payment\AuthorizerService
      */
     public function __invoke()
     {
-        /** @var  \App\Repositories\PaymentRepositoryInterface $paymentRepository */
-        $paymentRepository = app(PaymentRepositoryInterface::class);
-
-        /** @var  \App\Services\UserServiceInterface $paymentRepository */
-        $userService = app(UserServiceInterface::class);
-
-        return new PaymentService(
-            $paymentRepository,
-            $userService
-        );
+        return new AuthorizerService();
     }
 }

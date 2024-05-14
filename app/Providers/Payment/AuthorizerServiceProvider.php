@@ -1,20 +1,18 @@
 <?php
 
-namespace App\Providers;
+namespace App\Providers\Payment;
 
-use App\Repositories\PaymentRepositoryFactory;
-use App\Repositories\PaymentRepositoryInterface;
-use App\Services\PaymentServiceFactory;
-use App\Services\PaymentServiceInterface;
+use App\Services\Payment\AuthorizerServiceFactory;
+use App\Services\Payment\AuthorizerServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Class PaymentServiceProvider
- * @package   App\Providers
+ * Class AuthorizerServiceProvider
+ * @package   App\Providers\Payment
  * @author    Victor Torres <victorcdc96@gmail.com>
  * @copyright PP <www.pp.com.br>
  */
-class PaymentServiceProvider extends ServiceProvider
+class AuthorizerServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
@@ -24,16 +22,9 @@ class PaymentServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(
-            PaymentServiceInterface::class,
+            AuthorizerServiceInterface::class,
             function () {
-                return (new PaymentServiceFactory())();
-            }
-        );
-
-        $this->app->bind(
-            PaymentRepositoryInterface::class,
-            function () {
-                return (new PaymentRepositoryFactory())();
+                return (new AuthorizerServiceFactory())();
             }
         );
     }
