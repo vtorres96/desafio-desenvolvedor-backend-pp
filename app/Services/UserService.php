@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\UserRepositoryInterface;
-use Illuminate\Support\Collection;
+use Exception;
+use Throwable;
 
 /**
  * Class UserService
@@ -27,10 +28,43 @@ class UserService implements UserServiceInterface
 
     /**
      * @param array $data
-     * @return array
+     * @return void
+     * @throws Exception
      */
-    public function create(array $data): array
+    public function create(array $data): void
     {
-        return $this->userRepository->create($data);
+        try {
+            $data = $this->applyHashPassword($data);
+            $this->userRepository->beginTransaction();
+            $this->userRepository->create($data);
+            $this->userRepository->commitTransaction();
+        } catch (Exception $exception) {
+            $this->userRepository->rollbackTransaction();
+            throw new Exception($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param integer $id
+     * @return array|null
+     * @throws Exception
+     */
+    public function findById(int $id): ?array
+    {
+        try {
+            $response = $this->userRepository->findById($id);
+        } catch (Exception $exception) {
+            throw new Exception($exception->getMessage());
+        }
+
+        return $response;
+    }
+
+    private function applyHashPassword(array $data): array
+    {
+        return array_merge(
+            $data,
+            ['password' => bcrypt($data['password'])]
+        );
     }
 }

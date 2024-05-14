@@ -13,7 +13,7 @@ use Illuminate\Http\Response;
  * @author    Victor Tores <victorcdc96@gmail.com>
  * @copyright PP <www.pp.com.br>
  */
-class UserController extends Controller
+class UserController implements UserControllerInterface
 {
     /** @var \App\Services\UserServiceInterface $userService */
     private UserServiceInterface $userService;
@@ -30,23 +30,27 @@ class UserController extends Controller
 
     /**
      * @param UserRequest $request
+     * @return Response
+     */
+    public function create(UserRequest $request): Response
+    {
+        $data = $request->validated();
+        $this->userService->create($data);
+
+        return response()->noContent();
+    }
+
+    /**
+     * @param integer $id
      * @return JsonResponse
      */
-    public function create(UserRequest $request): JsonResponse
+    public function findById(int $id): JsonResponse
     {
-        try {
-            $data = $request->validated();
-            $response = $this->userService->create($data);
+        $response = $this->userService->findById($id);
 
-            return response()->json(
-                $response,
-                Response::HTTP_OK
-            );
-        } catch (\Exception $exception) {
-            return response()->json(
-                ['message' => $exception->getMessage()],
-                Response::HTTP_BAD_REQUEST
-            );
-        }
+        return response()->json(
+            ['data' => $response],
+            Response::HTTP_OK
+        );
     }
 }

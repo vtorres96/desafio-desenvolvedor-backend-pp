@@ -5,52 +5,26 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Services\UserServiceInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 /**
- * Class UserController
+ * Class UserControllerInterface
  * @package   App\Http\Controllers
  * @author    Victor Tores <victorcdc96@gmail.com>
  * @copyright PP <www.pp.com.br>
  */
-class UserController extends Controller
+interface UserControllerInterface
 {
-    /** @var \App\Services\UserServiceInterface $userService */
-    private UserServiceInterface $userService;
-
-    /**
-     * UserController constructor.
-     *
-     * @param \App\Services\UserServiceInterface $userService
-     */
-    public function __construct(UserServiceInterface $userService)
-    {
-        $this->userService = $userService;
-    }
-
     /**
      * @param UserRequest $request
      * @return Response
      */
-    public function create(UserRequest $request): Response
-    {
-        $data = $request->validated();
-        $this->userService->create($data);
-
-        return response()->noContent();
-    }
+    public function create(UserRequest $request): Response;
 
     /**
      * @param integer $id
      * @return JsonResponse
      */
-    public function findById(int $id): JsonResponse
-    {
-        $response = $this->userService->findById($id);
-
-        return response()->json(
-            ['data' => $response],
-            Response::HTTP_OK
-        );
-    }
+    public function findById(int $id): JsonResponse;
 }

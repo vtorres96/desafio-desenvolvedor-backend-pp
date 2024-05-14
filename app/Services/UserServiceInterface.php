@@ -12,7 +12,13 @@ interface UserServiceInterface
 {
     /**
      * @param array $data
-     * @return array
+     * @return void
      */
-    public function create(array $data): array;
+    public function create(array $data): void;
+
+    /**
+     * @param integer $id
+     * @return array|null
+     */
+    public function findById(int $id): ?array;
 }

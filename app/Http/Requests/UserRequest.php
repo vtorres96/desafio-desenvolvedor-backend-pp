@@ -13,6 +13,19 @@ use Illuminate\Validation\Rule;
  */
 class UserRequest extends FormRequest
 {
+    /** @var Rule $validationRule */
+    private Rule $validationRule;
+
+    /**
+     * UserRequest constructor.
+     * @param Rule $validationRule
+     */
+    public function __construct(Rule $validationRule)
+    {
+        parent::__construct();
+        $this->validationRule = $validationRule;
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -38,7 +51,7 @@ class UserRequest extends FormRequest
             'cpf_cnpj' => [
                 'required',
                 'string',
-                Rule::when($this->input('type') === 'common', ['size:11'], ['size:14']),
+                $this->validationRule->when($this->input('type') === 'common', ['size:11'], ['size:14']),
             ],
         ];
     }

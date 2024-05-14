@@ -16,12 +16,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function(){
     return view('welcome');
 });
-Route::post(
-    '/user',
-    [\App\Http\Controllers\UserController::class, 'create']
-)->name('pp.user.post');
+
+Route::prefix('user')->group(function(){
+    Route::post(
+        '/',
+        [\App\Http\Controllers\UserController::class, 'create']
+    )->name('pp.user.post');
+    Route::get(
+        '/{id}',
+        [\App\Http\Controllers\UserController::class, 'findById']
+    )->name('pp.user.id.get');
+});
 
 Route::post(
     '/transfer',
-    [\App\Http\Controllers\PaymentController::class, 'create']
+    [\App\Http\Controllers\PaymentController::class, 'transfer']
 )->name('pp.transfer.post');

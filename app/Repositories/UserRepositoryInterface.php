@@ -10,9 +10,4 @@ namespace App\Repositories;
  */
 interface UserRepositoryInterface
 {
-    /**
-     * @param array $data
-     * @return array
-     */
-    public function create(array $data): array;
 }
