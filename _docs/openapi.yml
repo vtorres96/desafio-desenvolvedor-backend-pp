@@ -3,35 +3,37 @@ info:
   title: Documentação da API PP
   version: 1.0.0
 paths:
-  /user/:
+  /api/user/:
     post:
       summary: Criar usuário
+      tags:
+        - User
       requestBody:
+        description: Payload necessário para criação de um Usuário
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                cpf_cnpj:
-                  type: string
-                email:
-                  type: string
-                password:
-                  type: string
-                type:
-                  type: string
-                  enum: ['common', 'shopkeeper']
-                balance:
-                  type: string
+              $ref: '#/components/schemas/UserRequest'
       responses:
-        '204':
-          description: Sucesso. O usuário foi criado com sucesso.
-  /user/{id}:
+        201:
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          $ref: '#/components/responses/httpStatusCode400'
+        404:
+          $ref: '#/components/responses/httpStatusCode404'
+        500:
+          $ref: '#/components/responses/httpStatusCode500'
+
+  /api/user/{id}:
     get:
       summary: Obter usuário por ID
+      tags:
+        - User
       parameters:
         - in: path
           name: id
@@ -41,36 +43,193 @@ paths:
             type: integer
             format: int64
       responses:
-        '200':
-          description: Sucesso. Retorna os dados do usuário.
+        200:
+          description: Retorna os dados do usuário
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                      name:
-                        type: string
-                      cpf_cnpj:
-                        type: string
-                      email:
-                        type: string
-                      type:
-                        type: string
-                      balance:
-                        type: string
-                      email_verified_at:
-                        type: string
-                        format: date-time
-                      created_at:
-                        type: string
-                        format: date-time
-                      updated_at:
-                        type: string
-                        format: date-time
-        '404':
-          description: Não encontrado. O usuário com o ID especificado não foi encontrado.
+                    $ref: '#/components/schemas/User'
+        400:
+          $ref: '#/components/responses/httpStatusCode400'
+        404:
+          $ref: '#/components/responses/httpStatusCode404'
+        500:
+          $ref: '#/components/responses/httpStatusCode500'
+  /api/payments:
+    post:
+      summary: Efetuar transferência entre dois usuários
+      tags:
+        - Payment
+      requestBody:
+        description: Payload necessário para efetuar transferência
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        201:
+          description: Transferência concluida com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        422:
+          $ref: '#/components/responses/httpStatusCode422'
+
+components:
+  parameters:
+    idParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+  schemas:
+    UserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        cpf_cnpj:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        type:
+          type: string
+          enum: ['common', 'shopkeeper']
+        balance:
+          type: string
+      required:
+        - name
+        - cpf_cnpj
+        - email
+        - password
+        - type
+        - balance
+    PaymentRequest:
+      type: object
+      properties:
+        value:
+          type: string
+          format: float
+          example: '12.50'
+        payer:
+          type: integer
+          example: 1
+        payee:
+          type: integer
+          example: 2
+      required:
+        - value
+        - payer
+        - payee
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example:
+        cpf_cnpj:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        type:
+          type: string
+          enum: ['common', 'shopkeeper']
+        balance:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-05-14T13:38:17Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2024-05-14T17:38:17Z
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        value:
+          type: number
+          example: "12.50"
+        payer:
+          type: integer
+          example: 1
+        payee:
+          type: integer
+          example: 2
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-05-14T13:38:17Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2024-05-14T17:38:17Z
+  responses:
+    httpStatusCode400:
+      description: Informativo sobre atributos ausentes ou inválidos encontrados durante validação da requisição
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                title: Dados obrigatórios ausentes ou inválidos foram informados
+                type: object
+                properties:
+                  campo1:
+                    type: array
+                    items:
+                      type: string
+                      example: "O atributo 'campo 1' é obrigatório"
+                  campo2:
+                    type: array
+                    items:
+                      type: string
+                      example: "Valor inválido. Campo 'campo 2' deve conter somente números inteiros"
+    httpStatusCode404:
+      description: "Recurso não encontrado"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Recurso não encontrado
+    httpStatusCode500:
+      description: Erro interno do servidor
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                example: Server Error
+                type: string
+    httpStatusCode422:
+      description: Entidade não processável - erro(s) de validação
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            example:
+              message: The given data was invalid.
