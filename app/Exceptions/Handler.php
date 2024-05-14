@@ -2,7 +2,12 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,5 +42,27 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Throwable               $exception
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function render($request, Throwable $exception): ResponseAlias
+    {
+        $request->headers->add(['X-Requested-With' => 'XMLHttpRequest']);
+        if ($exception instanceof InvalidArgumentException) {
+            $exception = new HttpException(ResponseAlias::HTTP_BAD_REQUEST, $exception->getMessage());
+        }
+
+        if ($exception instanceof ModelNotFoundException) {
+            $exception = new NotFoundHttpException("Recurso não encontrado", $exception);
+        }
+
+        return parent::render($request, $exception);
     }
 }
