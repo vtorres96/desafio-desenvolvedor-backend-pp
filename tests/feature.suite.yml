@@ -1,0 +1,4 @@
+actor: FeatureTester
+modules:
+    enabled:
+        - \Helper\Feature
