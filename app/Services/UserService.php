@@ -27,23 +27,25 @@ class UserService implements UserServiceInterface
 
     /**
      * @param array $data
-     * @return void
+     * @return array
      * @throws Exception
      */
-    public function create(array $data): void
+    public function create(array $data): array
     {
         try {
-            $this->validateDuplicateCpfAndEmail($data['cpf_cnpj'], $data['email']);
+            $this->checkCpfAndEmailHasDuplicated($data);
 
             $data = $this->applyHashPassword($data);
 
             $this->userRepository->beginTransaction();
-            $this->userRepository->create($data);
+            $response = $this->userRepository->create($data)->toArray();
             $this->userRepository->commitTransaction();
         } catch (Exception $exception) {
             $this->userRepository->rollbackTransaction();
             throw new Exception($exception->getMessage());
         }
+
+        return $response;
     }
 
     /**
@@ -71,7 +73,7 @@ class UserService implements UserServiceInterface
     public function update(int $id, array $data): void
     {
         try {
-            $this->validateDuplicateCpfAndEmail($data['cpf_cnpj'], $data['email']);
+            $this->checkCpfAndEmailHasDuplicated($data);
 
             $data = $this->applyHashPassword($data);
 
@@ -125,6 +127,17 @@ class UserService implements UserServiceInterface
 
         if (!empty($response)) {
             throw new Exception('Já existe um usuário com o CPF/CNPJ ou e-mail fornecido.');
+        }
+    }
+
+    /**
+     * @param array $data
+     * @throws Exception
+     */
+    private function checkCpfAndEmailHasDuplicated(array $data): void
+    {
+        if (isset($data['cpf_cnpj']) && isset($data['email'])) {
+            $this->validateDuplicateCpfAndEmail($data['cpf_cnpj'], $data['email']);
         }
     }
 }

@@ -26,9 +26,9 @@ interface UserServiceInterface
 
     /**
      * @param array $data
-     * @return void
+     * @return array
      */
-    public function create(array $data): void;
+    public function create(array $data): array;
 
     /**
      * @param integer $id

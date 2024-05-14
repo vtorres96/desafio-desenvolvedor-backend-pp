@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
-use App\Services\UserServiceInterface;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 /**
  * Class UserControllerInterface
@@ -18,9 +15,9 @@ interface UserControllerInterface
 {
     /**
      * @param UserRequest $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function create(UserRequest $request): Response;
+    public function create(UserRequest $request): JsonResponse;
 
     /**
      * @param integer $id

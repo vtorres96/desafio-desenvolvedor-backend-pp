@@ -30,14 +30,17 @@ class UserController implements UserControllerInterface
 
     /**
      * @param UserRequest $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function create(UserRequest $request): Response
+    public function create(UserRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $this->userService->create($data);
+        $response = $this->userService->update(8, $data);
 
-        return response()->noContent();
+        return response()->json(
+            ['data' => $response],
+            Response::HTTP_OK
+        );
     }
 
     /**
