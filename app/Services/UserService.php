@@ -33,7 +33,7 @@ class UserService implements UserServiceInterface
     public function create(array $data): void
     {
         try {
-            $this->isDuplicateUser($data['cpf_cnpj'], $data['email']);
+            $this->validateDuplicateCpfAndEmail($data['cpf_cnpj'], $data['email']);
 
             $data = $this->applyHashPassword($data);
 
@@ -71,7 +71,7 @@ class UserService implements UserServiceInterface
     public function update(int $id, array $data): void
     {
         try {
-            $this->isDuplicateUser($data['cpf_cnpj'], $data['email']);
+            $this->validateDuplicateCpfAndEmail($data['cpf_cnpj'], $data['email']);
 
             $data = $this->applyHashPassword($data);
 
@@ -119,7 +119,7 @@ class UserService implements UserServiceInterface
      * @param string $email
      * @throws Exception
      */
-    private function isDuplicateUser(string $cpfCnpj, string $email): void
+    private function validateDuplicateCpfAndEmail(string $cpfCnpj, string $email): void
     {
         $response = $this->getByCpfCnpjOrEmail($cpfCnpj, $email);
 
