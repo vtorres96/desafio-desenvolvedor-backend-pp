@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Models\User;
+
 /**
  * Class UserRepository
  * @package   App\Repositories
@@ -10,12 +12,25 @@ namespace App\Repositories;
  */
 class UserRepository implements UserRepositoryInterface
 {
+    /** @var User $model */
+    private User $model;
+
+    /**
+     * @param User $model
+     */
+    public function __construct(
+        User $model
+    )
+    {
+        $this->model = $model;
+    }
     /**
      * @param array $data
      * @return array
      */
     public function create(array $data): array
     {
-        return $data;
+        $lastId = $this->model->newQuery()->insertGetId($data);
+        return $this->model->newQuery()->find($lastId)->toArray();
     }
 }

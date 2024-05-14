@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Models\User;
+
 /**
  * Class UserRepositoryFactory
  * @package   App\Repositories
@@ -15,6 +17,11 @@ class UserRepositoryFactory
      */
     public function __invoke()
     {
-        return new UserRepository();
+        /** @var User $model */
+        $model = app(User::class);
+
+        return new UserRepository(
+            $model
+        );
     }
 }
