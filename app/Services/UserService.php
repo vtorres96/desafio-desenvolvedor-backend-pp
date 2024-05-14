@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Repositories\UserRepositoryInterface;
 use Exception;
-use Throwable;
 
 /**
  * Class UserService
@@ -34,7 +33,10 @@ class UserService implements UserServiceInterface
     public function create(array $data): void
     {
         try {
+            $this->isDuplicateUser($data['cpf_cnpj'], $data['email']);
+
             $data = $this->applyHashPassword($data);
+
             $this->userRepository->beginTransaction();
             $this->userRepository->create($data);
             $this->userRepository->commitTransaction();
@@ -60,11 +62,69 @@ class UserService implements UserServiceInterface
         return $response;
     }
 
+    /**
+     * @param integer $id
+     * @param array $data
+     * @return void
+     * @throws Exception
+     */
+    public function update(int $id, array $data): void
+    {
+        try {
+            $this->isDuplicateUser($data['cpf_cnpj'], $data['email']);
+
+            $data = $this->applyHashPassword($data);
+
+            $this->userRepository->beginTransaction();
+            $this->userRepository->update($id, $data);
+            $this->userRepository->commitTransaction();
+        } catch (Exception $exception) {
+            $this->userRepository->rollbackTransaction();
+            throw new Exception($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param string $cpfCnpj
+     * @param string $email
+     * @return array
+     * @throws Exception
+     */
+    public function getByCpfCnpjOrEmail(string $cpfCnpj, string $email): array
+    {
+        try {
+            $response = $this->userRepository->getByCpfCnpjOrEmail($cpfCnpj, $email);
+        } catch (Exception $exception) {
+            throw new Exception($exception->getMessage());
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
     private function applyHashPassword(array $data): array
     {
-        return array_merge(
-            $data,
-            ['password' => bcrypt($data['password'])]
-        );
+        if (!empty($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param string $cpfCnpj
+     * @param string $email
+     * @throws Exception
+     */
+    private function isDuplicateUser(string $cpfCnpj, string $email): void
+    {
+        $response = $this->getByCpfCnpjOrEmail($cpfCnpj, $email);
+
+        if (!empty($response)) {
+            throw new Exception('Já existe um usuário com o CPF/CNPJ ou e-mail fornecido.');
+        }
     }
 }

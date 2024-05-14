@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use Exception;
+
 /**
  * Interface UserRepositoryInterface
  * @package   App\Repositories
@@ -10,4 +12,11 @@ namespace App\Repositories;
  */
 interface UserRepositoryInterface
 {
+    /**
+     * @param string $cpfCnpj
+     * @param string $email
+     * @return array
+     * @throws Exception
+     */
+    public function getByCpfCnpjOrEmail(string $cpfCnpj, string $email): array;
 }

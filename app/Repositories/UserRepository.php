@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use Exception;
 
 /**
  * Class UserRepository
@@ -19,5 +20,20 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         User $model
     ) {
         parent::__construct($model);
+    }
+
+    /**
+     * @param string $cpfCnpj
+     * @param string $email
+     * @return array
+     * @throws Exception
+     */
+    public function getByCpfCnpjOrEmail(string $cpfCnpj, string $email): array
+    {
+        return $this->model->newQuery()
+            ->where('cpf_cnpj', $cpfCnpj)
+            ->orWhere('email', $email)
+            ->get()
+            ->toArray();
     }
 }
