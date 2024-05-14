@@ -23,4 +23,3 @@ coverage:
   show_only_summary: false
 settings:
   memory_limit: 2048M
-

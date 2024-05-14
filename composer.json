@@ -13,12 +13,19 @@
         "laravel/tinker": "^2.5"
     },
     "require-dev": {
+        "codeception/codeception": "^4.2",
+        "codeception/module-asserts": "^2.0",
         "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^5.10",
-        "phpunit/phpunit": "^9.5.10"
+        "phpcp/phpcp": "^0.1.1",
+        "phpmd/phpmd": "^2.15",
+        "phpstan/phpstan": "^1.11",
+        "phpunit/phpunit": "^9.5.10",
+        "sebastian/phpcpd": "^6.0",
+        "squizlabs/php_codesniffer": "^3.9"
     },
     "autoload": {
         "psr-4": {
@@ -48,12 +55,12 @@
         ],
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
-        "test-codequality": "./vendor/bin/phpmd ./app text phpmd-ics --exclude app/Entities/",
+        "test-codequality": "./vendor/bin/phpmd ./app text codesize",
         "cs-psr12-check": "phpcs --standard=PSR12 app/ tests/unit",
         "cs-phpdoc-check": "phpcs ./app ./tests --standard=Squiz --sniffs=Squiz.Commenting.FunctionCommentThrowTag,Squiz.Commenting.VariableComment",
         "test": "codecept run unit",
-        "check-copy-paste": "./vendor/bin/phpcpd ./app --min-lines=4 --progress --no-interaction",
-        "phpstan": "./vendor/bin/phpstan analyse",
+        "check-copy-paste": "./vendor/bin/phpcpd ./app --min-lines=4",
+        "phpstan": "./vendor/bin/phpstan analyse app tests",
         "pipelines": "composer cs-psr12-check && composer cs-phpdoc-check && composer test-codequality && composer test && composer phpstan && composer check-copy-paste"
     },
     "extra": {
@@ -64,7 +71,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
