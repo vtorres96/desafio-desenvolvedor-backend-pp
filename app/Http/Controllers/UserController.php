@@ -39,7 +39,7 @@ class UserController implements UserControllerInterface
 
         return response()->json(
             ['data' => $response],
-            Response::HTTP_OK
+            Response::HTTP_CREATED
         );
     }
 

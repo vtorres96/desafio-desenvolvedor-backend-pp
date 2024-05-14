@@ -39,7 +39,7 @@ class PaymentController implements PaymentControllerInterface
 
         return response()->json(
             ['data' => $response],
-            Response::HTTP_OK
+            Response::HTTP_CREATED
         );
     }
 }
