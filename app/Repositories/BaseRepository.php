@@ -32,11 +32,11 @@ abstract class BaseRepository
 
     /**
      * @param array $data
-     * @return integer
+     * @return \Illuminate\Database\Eloquent\Builder|Model|int
      */
-    public function create(array $data): int
+    public function create(array $data)
     {
-        return $this->model->newQuery()->insertGetId(
+        return $this->model->newQuery()->create(
             $this->model->fill($data)->getAttributes()
         );
     }
