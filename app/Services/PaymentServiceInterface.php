@@ -14,5 +14,5 @@ interface PaymentServiceInterface
      * @param array $data
      * @return array
      */
-    public function create(array $data): array;
+    public function transfer(array $data): array;
 }

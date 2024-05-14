@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Models\Payment;
+
 /**
  * Class PaymentRepositoryFactory
  * @package   App\Repositories
@@ -15,6 +17,11 @@ class PaymentRepositoryFactory
      */
     public function __invoke()
     {
-        return new PaymentRepository();
+        /** @var Payment $model */
+        $model = app(Payment::class);
+
+        return new PaymentRepository(
+            $model
+        );
     }
 }

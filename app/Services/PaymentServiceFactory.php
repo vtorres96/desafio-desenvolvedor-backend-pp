@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\PaymentRepositoryInterface;
+use App\Services\Payment\AuthorizerServiceInterface;
+use App\Services\UserServiceInterface;
 
 /**
  * Class PaymentServiceFactory
@@ -20,8 +22,16 @@ class PaymentServiceFactory
         /** @var  \App\Repositories\PaymentRepositoryInterface $paymentRepository */
         $paymentRepository = app(PaymentRepositoryInterface::class);
 
+        /** @var  \App\Services\UserServiceInterface $userService */
+        $userService = app(UserServiceInterface::class);
+
+        /** @var  \App\Services\Payment\AuthorizerServiceInterface $authorizerService */
+        $authorizerService = app(AuthorizerServiceInterface::class);
+
         return new PaymentService(
-            $paymentRepository
+            $paymentRepository,
+            $userService,
+            $authorizerService
         );
     }
 }

@@ -13,7 +13,7 @@ use Illuminate\Http\Response;
  * @author    Victor Torres <victorcdc96@gmail.com>
  * @copyright PP <www.pp.com.br>
  */
-class PaymentController extends Controller
+class PaymentController implements PaymentControllerInterface
 {
     /** @var \App\Services\PaymentServiceInterface */
     private PaymentServiceInterface $paymentService;
@@ -32,21 +32,14 @@ class PaymentController extends Controller
      * @param PaymentRequest $request
      * @return JsonResponse
      */
-    public function create(PaymentRequest $request): JsonResponse
+    public function transfer(PaymentRequest $request): JsonResponse
     {
-        try {
-            $data = $request->validated();
-            $response = $this->paymentService->create($data);
+        $data = $request->validated();
+        $response = $this->paymentService->transfer($data);
 
-            return response()->json(
-                ['data' => $response],
-                Response::HTTP_OK
-            );
-        } catch (\Exception $exception) {
-            return response()->json(
-                ['message' => 'Falha ao processar requisição'],
-                Response::HTTP_BAD_REQUEST
-            );
-        }
+        return response()->json(
+            ['data' => $response],
+            Response::HTTP_OK
+        );
     }
 }
