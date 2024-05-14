@@ -26,9 +26,9 @@ abstract class BaseRepository
      */
     public function findById(int $id): ?array
     {
-        return $this->model->newQuery()->find($id)->toArray();
+        $queryBuilder = $this->model->newQuery()->findOrFail($id);
+        return $queryBuilder->toArray();
     }
-
 
     /**
      * @param array $data
@@ -39,6 +39,27 @@ abstract class BaseRepository
         return $this->model->newQuery()->insertGetId(
             $this->model->fill($data)->getAttributes()
         );
+    }
+
+    /**
+     * @param int $id
+     * @return bool|mixed|null
+     */
+    public function delete(int $id): bool
+    {
+        $queryBuilder = $this->model->newQuery()->findOrFail($id);
+        return $queryBuilder->delete();
+    }
+
+    /**
+     * @param $id
+     * @param array $data
+     * @return bool|int
+     */
+    public function update($id, array $data): bool
+    {
+        $queryBuilder = $this->model->newQuery()->findOrFail($id);
+        return $queryBuilder->update($data);
     }
 
     /**
