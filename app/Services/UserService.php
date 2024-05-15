@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\UserRepositoryInterface;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Class UserService
@@ -56,7 +57,17 @@ class UserService implements UserServiceInterface
     public function findById(int $id): ?array
     {
         try {
+            $cacheKey = 'user_' . $id;
+
+            if (Cache::has($cacheKey)) {
+                return Cache::get($cacheKey);
+            }
+
             $response = $this->userRepository->findById($id);
+
+            if (!empty($response)) {
+                Cache::put($cacheKey, $response, now()->addMinutes(60));
+            }
         } catch (Exception $exception) {
             throw new Exception($exception->getMessage());
         }
