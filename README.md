@@ -24,6 +24,14 @@ DB_PORT=3306
 DB_DATABASE=pp
 DB_USERNAME=homestead
 DB_PASSWORD=secret
+
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=user
+MAIL_PASSWORD=password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your_email@example.com
 ```
 
 ## How to run the migrations
