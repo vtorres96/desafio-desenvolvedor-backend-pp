@@ -50,6 +50,13 @@ class UserRepositoryTest extends TestCase
         );
     }
 
+    public function testInstanceOfPaymentRepository(): void
+    {
+        $repository = $this->getConcreteClass();
+
+        $this->assertInstanceOf(UserRepository::class, $repository);
+    }
+
     /**
      * Test get user by cpf cnp or email.
      *
