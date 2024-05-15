@@ -1,30 +1,27 @@
 <?php
 
-namespace ICSSegurancaLvTests\Unit\Http\Controllers\Autenticacao\Mfa;
+namespace Tests\unit\Http\Controllers;
 
+use App\Http\Controllers\UserController;
+use App\Services\UserServiceInterface;
 use Faker\Factory;
-use Fig\Http\Message\StatusCodeInterface;
-use ICSSegurancaLv\Http\Controllers\Autenticacao\Mfa\MfaController;
-use ICSSegurancaLv\Http\Requests\AutenticacaoRequest;
-use ICSSegurancaLv\Services\Autenticacao\Mfa\MfaServiceFactoryMethodInterface;
-use ICSSegurancaLv\Services\Autenticacao\Mfa\MfaServiceInterface;
-use ICSSegurancaLvTests\TestCase;
+use App\Http\Requests\UserRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Mockery;
+use Illuminate\Support\Str;
+use Tests\TestCase;
 
 /**
- * Class MfaControllerTest
- * @package   ICSSegurancaLvTests\Unit\Http\Controllers\Autenticacao\Mfa
- * @author    Victor Torres <victor.torres_taking@totalexpress.com.br>
- * @copyright Total Express <www.totalexpress.com.br>
+ * Class UserControllerTest
+ * @package   Tests\unit\Http\Controllers
+ * @author    Victor Torres <victorcdc96@gmail.com>
+ * @copyright PP <www.pp.com.br>
  */
-class MfaControllerTest extends TestCase
+class UserControllerTest extends TestCase
 {
-    /** @var \ICSSegurancaLv\Services\Autenticacao\Mfa\MfaServiceFactoryMethodInterface|Mockery\MockInterface */
-    private $mfaFabrica;
-
-    /** @var \ICSSegurancaLv\Services\Autenticacao\Mfa\MfaServiceInterface|Mockery\MockInterface */
-    private $mfaServico;
+    /** @var \App\Services\UserServiceInterface|Mockery\MockInterface $userService */
+    private $userService;
 
     /** @var \Faker\Generator */
     private $faker;
@@ -33,61 +30,63 @@ class MfaControllerTest extends TestCase
     {
         parent::setUp();
 
-        $this->mfaFabrica = Mockery::mock(MfaServiceFactoryMethodInterface::class);
-        $this->mfaServico = Mockery::mock(MfaServiceInterface::class);
+        $this->userService = Mockery::mock(UserServiceInterface::class);
         $this->faker = Factory::create('pt_BR');
     }
 
-    private function obterClasseConcreta(): MfaController
+    private function getConcreteClass(): UserController
     {
-        return new MfaController($this->mfaFabrica);
+        return new UserController($this->userService);
     }
 
-    public function testAutenticarRetornandoStatusOk(): void
+    public function testCreate(): void
     {
-        $dados = [
-            'login' => 'tex_2024',
-            'password' => 'Total@1234'
+        $data = [
+            'name' => $this->faker->name(),
+            'cpf_cnpj' => $this->faker->numberBetween(1, 11),
+            'email' => $this->faker->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => bcrypt('password'),
+            'remember_token' => Str::random(10),
+            'type' => $this->faker->randomElement(['common', 'shopkeeper']),
+            'balance' => $this->faker->randomFloat(2, 0, 1000),
         ];
-        $token = 'token_ics_authentication';
-        $resposta = [
-            'data' => [
-                'ICS-Authentication' => $token
-            ]
+        $response = [
+            'data' => $data
         ];
 
-        $request = $this->prophesize(AutenticacaoRequest::class);
-        $request->validated()->willReturn($dados);
-        $this->mfaFabrica->shouldReceive('factoryByLogin')
-            ->with($dados['login'])->andReturn($this->mfaServico);
-        $this->mfaServico->shouldReceive('autenticar')->andReturn($resposta);
+        $request = Mockery::mock(UserRequest::class);
+        $request->shouldReceive('validated')->andReturn($data);
+        $this->userService->shouldReceive('create')->with($data)->andReturn($response);
 
-        $retorno = $this->obterClasseConcreta()->autenticar($request->reveal());
+        $response = $this->getConcreteClass()->create($request);
 
-        $this->assertInstanceOf(JsonResponse::class, $retorno);
-        $this->assertEquals(StatusCodeInterface::STATUS_OK, $retorno->getStatusCode());
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
     }
 
-    public function testAutenticarRetornandoStatusMovedPermanently(): void
+    public function testFindById(): void
     {
-        $dados = [
-            'login' => 'tex_2024',
-            'password' => 'Total@1234'
+        $id = $this->faker->numberBetween(1, 10);
+        $data = [
+            'name' => $this->faker->name(),
+            'cpf_cnpj' => $this->faker->numberBetween(1, 11),
+            'email' => $this->faker->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => bcrypt('password'),
+            'remember_token' => Str::random(10),
+            'type' => $this->faker->randomElement(['common', 'shopkeeper']),
+            'balance' => $this->faker->randomFloat(2, 0, 1000),
         ];
-        $token = 'access_token_mfa';
-        $resposta = [
-            'data' => $token
+        $response = [
+            'data' => $data
         ];
 
-        $request = $this->prophesize(AutenticacaoRequest::class);
-        $request->validated()->willReturn($dados);
-        $this->mfaFabrica->shouldReceive('factoryByLogin')
-            ->with($dados['login'])->andReturn($this->mfaServico);
-        $this->mfaServico->shouldReceive('autenticar')->andReturn($resposta);
+        $this->userService->shouldReceive('findById')->with($id)->andReturn($response);
 
-        $retorno = $this->obterClasseConcreta()->autenticar($request->reveal());
+        $response = $this->getConcreteClass()->findById($id);
 
-        $this->assertInstanceOf(JsonResponse::class, $retorno);
-        $this->assertEquals(StatusCodeInterface::STATUS_MOVED_PERMANENTLY, $retorno->getStatusCode());
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
     }
 }
