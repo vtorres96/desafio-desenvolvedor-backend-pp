@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\PaymentRepositoryInterface;
+use App\Services\Notification\EmailServiceInterface;
 use App\Services\Payment\AuthorizerServiceInterface;
 use App\Services\UserServiceInterface;
 use Exception;
@@ -24,20 +25,26 @@ class PaymentService implements PaymentServiceInterface
     /** @var \App\Services\Payment\AuthorizerServiceInterface $authorizerService */
     private AuthorizerServiceInterface $authorizerService;
 
+    /** @var \App\Services\Notification\EmailServiceInterface $emailService */
+    private EmailServiceInterface $emailService;
+
     /**
      * PaymentService constructor.
      * @param \App\Repositories\PaymentRepositoryInterface $paymentRepository
      * @param \App\Services\UserServiceInterface $userService
      * @param \App\Services\Payment\AuthorizerServiceInterface $authorizerService
+     * @param \App\Services\Notification\EmailServiceInterface $emailService
      */
     public function __construct(
         PaymentRepositoryInterface $paymentRepository,
         UserServiceInterface $userService,
-        AuthorizerServiceInterface $authorizerService
+        AuthorizerServiceInterface $authorizerService,
+        EmailServiceInterface $emailService
     ) {
         $this->paymentRepository = $paymentRepository;
         $this->userService = $userService;
         $this->authorizerService = $authorizerService;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -62,6 +69,7 @@ class PaymentService implements PaymentServiceInterface
             $this->changeBalance($payer, -$data['value']);
             $this->changeBalance($payee, $data['value']);
             $response = $this->paymentRepository->create($data)->toArray();
+            $this->notifyUsers($payer, $payee, $data['value']);
 
             $this->paymentRepository->commitTransaction();
         } catch (Exception $exception) {
@@ -118,5 +126,28 @@ class PaymentService implements PaymentServiceInterface
         ];
 
         $this->userService->update($user['id'], $newBalance);
+    }
+
+    /**
+     * @param array $payer
+     * @param array $payee
+     * @param float $amount
+     * @return void
+     */
+    private function notifyUsers(array $payer, array $payee, float $amount): void
+    {
+        $formatedValue = number_format($amount, 2, ',', '.');
+        $emailPayer = [
+            'email' => $payer["email"],
+            'subject' => 'Transferência enviada com sucesso',
+            'content' => "Sua transferência no valor de R$ $formatedValue foi enviada com sucesso"
+        ];
+        $emailPayee = [
+            'email' => $payee["email"],
+            'subject' => 'Transferência recebida com sucesso',
+            'content' => "Você recebeu um depósito no valor de R$ $formatedValue"
+        ];
+        $this->emailService->sendEmail($emailPayer);
+        $this->emailService->sendEmail($emailPayee);
     }
 }

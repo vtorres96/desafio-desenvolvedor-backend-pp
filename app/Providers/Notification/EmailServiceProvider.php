@@ -1,20 +1,18 @@
 <?php
 
-namespace App\Providers;
+namespace App\Providers\Notification;
 
-use App\Repositories\PaymentRepositoryFactory;
-use App\Repositories\PaymentRepositoryInterface;
-use App\Services\PaymentServiceFactory;
-use App\Services\PaymentServiceInterface;
+use App\Services\Notification\EmailServiceFactory;
+use App\Services\Notification\EmailServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Class PaymentServiceProvider
- * @package   App\Providers
+ * Class EmailServiceProvider
+ * @package   App\Providers\Notification
  * @author    Victor Torres <victorcdc96@gmail.com>
  * @copyright PP <www.pp.com.br>
  */
-class PaymentServiceProvider extends ServiceProvider
+class EmailServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
@@ -24,16 +22,9 @@ class PaymentServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(
-            PaymentServiceInterface::class,
+            EmailServiceInterface::class,
             function () {
-                return (new PaymentServiceFactory())();
-            }
-        );
-
-        $this->app->bind(
-            PaymentRepositoryInterface::class,
-            function () {
-                return (new PaymentRepositoryFactory())();
+                return (new EmailServiceFactory())();
             }
         );
     }

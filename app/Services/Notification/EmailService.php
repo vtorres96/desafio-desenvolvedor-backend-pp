@@ -2,33 +2,23 @@
 
 namespace App\Services\Notification;
 
-use SendGrid\Mail\Mail;
-use SendGrid\Mail\TypeException;
-use SendGrid;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Mail as Mailable;
 
-class EmailService
+/**
+ * Class EmailService
+ * @package   App\Services\Notification
+ * @author    Victor Torres <victorcdc96@gmail.com>
+ * @copyright PP <www.pp.com.br>
+ */
+class EmailService implements EmailServiceInterface
 {
-    /** @var SendGrid $sendGrid */
-    protected SendGrid $sendGrid;
-
-    public function __construct()
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function sendEmail(array $data): void
     {
-        $this->sendGrid = new SendGrid(config('services.sendgrid.api_key'));
-    }
-
-    public function sendEmail($to, $subject, $htmlContent)
-    {
-        $email = new Mail();
-        $email->setFrom("victorcdc96@gmail.com", "Victor");
-        $email->setSubject($subject);
-        $email->addTo($to);
-        $email->addContent("text/html", $htmlContent);
-
-        try {
-            $response = $this->sendGrid->send($email);
-            return $response->statusCode();
-        } catch (TypeException $exception) {
-            return $exception->getCode();
-        }
+        Mail::to($data['email'])->send(new Mailable($data['subject'], $data['content']));
     }
 }

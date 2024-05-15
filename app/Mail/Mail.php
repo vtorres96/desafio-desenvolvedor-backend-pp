@@ -12,30 +12,32 @@ class Mail extends Mailable
     use SerializesModels;
 
     /**
-     * The subject of the message.
+     * The subject of the email.
      *
      * @var string
      */
     public $subject;
 
     /**
-     * The message content.
+     * The email content.
      *
      * @var string
      */
-    public $messageContent;
+    public $content;
 
     /**
      * Create a new message instance.
      *
-     * @param  string  $subject
-     * @param  string  $messageContent
+     * @param string $subject
+     * @param  string  $content
      * @return void
      */
-    public function __construct($subject, $messageContent)
-    {
+    public function __construct(
+        string $subject,
+        string $content
+    ) {
         $this->subject = $subject;
-        $this->messageContent = $messageContent;
+        $this->content = $content;
     }
 
     /**
@@ -47,6 +49,6 @@ class Mail extends Mailable
     {
         return $this->subject($this->subject)
             ->view('emails.notify-transaction')
-            ->with(['messageContent' => $this->messageContent]);
+            ->with(['content' => $this->content]);
     }
 }

@@ -168,6 +168,7 @@ return [
         App\Providers\PaymentServiceProvider::class,
         App\Providers\UserServiceProvider::class,
         App\Providers\Payment\AuthorizerServiceProvider::class,
+        App\Providers\Notification\EmailServiceProvider::class,
 
         /*
          * Application Service Providers...

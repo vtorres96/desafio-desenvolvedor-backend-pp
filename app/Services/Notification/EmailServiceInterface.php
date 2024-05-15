@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Notification;
 
 /**
- * Interface PaymentServiceInterface
- * @package   App\Services
+ * Interface EmailServiceInterface
+ * @package   App\Services\Notification
  * @author    Victor Torres <victorcdc96@gmail.com>
  * @copyright PP <www.pp.com.br>
  */
-interface PaymentServiceInterface
+interface EmailServiceInterface
 {
     /**
      * @param array $data
-     * @return array
+     * @return void
      */
-    public function transfer(array $data): array;
+    public function sendEmail(array $data): void;
 }
