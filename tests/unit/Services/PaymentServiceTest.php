@@ -2,6 +2,7 @@
 
 namespace Tests\unit\Services;
 
+use App\Models\Payment;
 use App\Repositories\PaymentRepository;
 use App\Repositories\PaymentRepositoryInterface;
 use App\Services\Notification\EmailService;
@@ -11,6 +12,8 @@ use App\Services\PaymentService;
 use App\Services\UserService;
 use App\Services\UserServiceInterface;
 use App\Services\Payment\AuthorizerServiceInterface;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -29,12 +32,21 @@ class PaymentServiceTest extends TestCase
     /** @var \Mockery\MockInterface|\App\Services\Notification\EmailServiceInterface $emailService */
     private MockInterface $emailService;
 
+    /** @var \Mockery\MockInterface|\App\Models\Payment $paymentModel */
+    private MockInterface $paymentModel;
+
+    /** @var \Illuminate\Database\Eloquent\Builder|\Mockery\LegacyMockInterface|\Mockery\MockInterface $eloquentBuilder */
+    private $eloquentBuilder;
+
+
     /**
      * @inheritDoc
      */
     protected function setUp(): void
     {
         parent::setUp();
+        $this->paymentModel = Mockery::mock(Payment::class);
+        $this->eloquentBuilder = Mockery::mock(Builder::class);
         $this->paymentRepository = Mockery::mock(
             PaymentRepository::class,
             PaymentRepositoryInterface::class
@@ -51,6 +63,8 @@ class PaymentServiceTest extends TestCase
             EmailService::class,
             EmailServiceInterface::class
         );
+
+        $this->paymentModel->shouldReceive('newQuery')->andReturns($this->eloquentBuilder);
     }
 
     /**
@@ -66,8 +80,125 @@ class PaymentServiceTest extends TestCase
         );
     }
 
-//    public function testCreateAuthorizedPayment()
-//    {
-//        $this->authorizerService->shouldReceive('checkTransactionIsAuthorized')->andReturn(true);
-//    }
+    /**
+     * Test successful transfer.
+     *
+     * @throws Exception
+     */
+    public function testTransferSuccessfully(): void
+    {
+        $data = [
+            'payer' => 1,
+            'payee' => 2,
+            'value' => 100.0,
+        ];
+
+        $payer = [
+            'id' => 1,
+            'type' => UserServiceInterface::COMMON,
+            'balance' => 200.0,
+            'email' => 'payer@example.com',
+        ];
+
+        $payee = [
+            'id' => 2,
+            'type' => UserServiceInterface::SHOPKEEPER,
+            'balance' => 50.0,
+            'email' => 'payee@example.com',
+        ];
+
+        $this->paymentRepository->shouldReceive('beginTransaction')->once();
+        $this->paymentModel->shouldReceive('toArray')->andReturn($data);
+        $this->paymentRepository->shouldReceive('create')->once()->andReturn($this->paymentModel);
+        $this->paymentRepository->shouldReceive('commitTransaction')->once();
+        $this->paymentRepository->shouldNotReceive('rollbackTransaction');
+
+        $this->userService->shouldReceive('findById')->with($data['payer'])->andReturn($payer);
+        $this->userService->shouldReceive('findById')->with($data['payee'])->andReturn($payee);
+        $this->userService->shouldReceive('update')->twice();
+
+        $this->authorizerService->shouldReceive('checkTransactionIsAuthorized')->once()->andReturn(true);
+
+        $this->emailService->shouldReceive('sendEmail')->twice();
+
+        $paymentService = $this->getConcreteClass();
+        $response = $paymentService->transfer($data);
+
+        $this->assertIsArray($response);
+        $this->assertEquals($data, (array)$response);
+    }
+
+    /**
+     * Test transfer with insufficient balance.
+     *
+     * @throws Exception
+     */
+    public function testTransferInsufficientBalance(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Saldo insuficiente para realizar o pagamento');
+
+        $data = [
+            'payer' => 1,
+            'payee' => 2,
+            'value' => 300.0,
+        ];
+
+        $payer = [
+            'id' => 1,
+            'type' => UserServiceInterface::COMMON,
+            'balance' => 200.0,
+            'email' => 'payer@example.com',
+        ];
+
+        $this->paymentRepository->shouldReceive('beginTransaction')->once();
+        $this->paymentRepository->shouldReceive('rollbackTransaction')->once();
+
+        $this->userService->shouldReceive('findById')->with($data['payer'])->andReturn($payer);
+
+        $paymentService = $this->getConcreteClass();
+        $paymentService->transfer($data);
+    }
+
+    /**
+     * Test transfer when authorization fails.
+     *
+     * @throws Exception
+     */
+    public function testTransferAuthorizationFailed(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Transação negada');
+
+        $data = [
+            'payer' => 1,
+            'payee' => 2,
+            'value' => 100.0,
+        ];
+
+        $payer = [
+            'id' => 1,
+            'type' => UserServiceInterface::COMMON,
+            'balance' => 200.0,
+            'email' => 'payer@example.com',
+        ];
+
+        $payee = [
+            'id' => 2,
+            'type' => UserServiceInterface::SHOPKEEPER,
+            'balance' => 50.0,
+            'email' => 'payee@example.com',
+        ];
+
+        $this->paymentRepository->shouldReceive('beginTransaction')->once();
+        $this->paymentRepository->shouldReceive('rollbackTransaction')->once();
+
+        $this->userService->shouldReceive('findById')->with($data['payer'])->andReturn($payer);
+        $this->userService->shouldReceive('findById')->with($data['payee'])->andReturn($payee);
+
+        $this->authorizerService->shouldReceive('checkTransactionIsAuthorized')->once()->andReturn(false);
+
+        $paymentService = $this->getConcreteClass();
+        $paymentService->transfer($data);
+    }
 }
