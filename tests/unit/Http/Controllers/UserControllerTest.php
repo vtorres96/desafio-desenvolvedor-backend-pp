@@ -39,7 +39,11 @@ class UserControllerTest extends TestCase
         return new UserController($this->userService);
     }
 
-    public function testCreate(): void
+    /**
+     * Test successful create user.
+     *
+     */
+    public function testCreateSuccessfully(): void
     {
         $data = [
             'name' => $this->faker->name(),
@@ -65,6 +69,10 @@ class UserControllerTest extends TestCase
         $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
     }
 
+    /**
+     * Test successful get user by id.
+     *
+     */
     public function testFindById(): void
     {
         $id = $this->faker->numberBetween(1, 10);

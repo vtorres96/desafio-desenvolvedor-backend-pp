@@ -58,6 +58,8 @@ class UserServiceTest extends TestCase
     }
 
     /**
+     * Test successful create user.
+     *
      * @throws \Exception
      */
     public function testCreateUserSuccessfully(): void
@@ -84,6 +86,11 @@ class UserServiceTest extends TestCase
         $this->assertEquals($data, $response);
     }
 
+    /**
+     * Test successful get user by id.
+     *
+     * @throws \Exception
+     */
     public function testFindUserByIdSuccessfully(): void
     {
         $userId = $this->faker->numberBetween(1, 10);
