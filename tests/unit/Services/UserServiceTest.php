@@ -2,6 +2,7 @@
 
 namespace Tests\unit\Services;
 
+use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Repositories\UserRepositoryInterface;
 use App\Services\UserService;
@@ -21,6 +22,9 @@ class UserServiceTest extends TestCase
 {
     use WithFaker;
 
+    /** @var \Mockery\MockInterface|\App\Models\User $userModel */
+    private MockInterface $userModel;
+
     /** @var \Mockery\MockInterface|\App\Repositories\UserRepositoryInterface $userRepository */
     private MockInterface $userRepository;
 
@@ -33,11 +37,14 @@ class UserServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->userModel = Mockery::mock(User::class);
+        $this->eloquentBuilder = Mockery::mock(Builder::class);
         $this->userRepository = Mockery::mock(
             UserRepository::class,
             UserRepositoryInterface::class
         );
-        $this->eloquentBuilder = Mockery::mock(Builder::class);
+
+        $this->userModel->shouldReceive('newQuery')->andReturns($this->eloquentBuilder);
     }
 
     /**
@@ -53,26 +60,29 @@ class UserServiceTest extends TestCase
     /**
      * @throws \Exception
      */
-//    public function testCreateUserSuccessfully(): void
-//    {
-//        $data = [
-//            'name' => $this->faker->name(),
-//            'cpf_cnpj' => $this->faker->numerify('###########'),
-//            'email' => $this->faker->unique()->safeEmail(),
-//            'password' => $this->faker->password(),
-//        ];
-//
-//        $this->userRepository->shouldReceive('getByCpfCnpjOrEmail')->once()
-//            ->with($data['cpf_cnpj'], $data['email'])->andReturn([]);
-//        $this->userRepository->shouldReceive('beginTransaction')->once();
-//        $this->userRepository->shouldReceive('create')->once()->andReturn($data);
-//        $this->userRepository->shouldReceive('commitTransaction')->once();
-//        $this->userRepository->shouldNotReceive('rollbackTransaction');
-//        $response = $this->getConcreteClass()->create($data);
-//
-//        $this->assertIsArray($response);
-//        $this->assertEquals($data, $response);
-//    }
+    public function testCreateUserSuccessfully(): void
+    {
+        $data = [
+            'name' => $this->faker->name(),
+            'cpf_cnpj' => $this->faker->numerify('###########'),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => $this->faker->password(),
+        ];
+
+        $this->userModel->shouldReceive('toArray')->andReturn($data);
+        $this->userRepository->shouldReceive('getByCpfCnpjOrEmail')->once()
+            ->with($data['cpf_cnpj'], $data['email'])->andReturn([]);
+        $this->userRepository->shouldReceive('beginTransaction')->once();
+        $this->eloquentBuilder->shouldReceive('create')->andReturn($this->eloquentBuilder);
+        $this->eloquentBuilder->shouldReceive('toArray')->andReturn($this->eloquentBuilder);
+        $this->userRepository->shouldReceive('create')->once()->andReturn($this->userModel);
+        $this->userRepository->shouldReceive('commitTransaction')->once();
+        $this->userRepository->shouldNotReceive('rollbackTransaction');
+        $response = $this->getConcreteClass()->create($data);
+
+        $this->assertIsArray($response);
+        $this->assertEquals($data, $response);
+    }
 
     public function testFindUserByIdSuccessfully(): void
     {
