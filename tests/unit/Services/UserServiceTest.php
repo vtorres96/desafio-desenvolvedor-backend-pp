@@ -1,29 +1,31 @@
 <?php
 
-namespace ICSSegurancaLvTests\Unit\Services\Autenticacao\Mfa\Validacao;
+namespace Tests\unit\Services;
 
-use Fig\Http\Message\StatusCodeInterface;
-use ICSSegurancaLv\Exceptions\ICSHttpException;
-use ICSSegurancaLv\Services\Autenticacao\Mfa\Validacao\ValidacaoService;
-use ICSSegurancaLv\Services\BCryptService;
-use ICSSegurancaLv\Services\BCryptServiceInterface;
-use ICSSegurancaLvTests\TestCase;
+use App\Repositories\UserRepository;
+use App\Repositories\UserRepositoryInterface;
+use App\Services\UserService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\WithFaker;
 use Mockery;
 use Mockery\MockInterface;
+use Tests\TestCase;
 
 /**
- * class ValidacaoServiceTest
- * @package ICSSegurancaLvTests\Unit\Services\Autenticacao\Mfa\Validacao
- * @author Victor Torres <victor.torres_taking@totalexpress.com.br>
- * @copyright Total Express <www.totalexpress.com.br>
+ * Class UserServiceTest
+ * @package   Tests\unit\Services
+ * @author    Victor Torres <victorcdc96@gmail.com>
+ * @copyright PP <www.pp.com.br>
  */
-class ValidacaoServiceTest extends TestCase
+class UserServiceTest extends TestCase
 {
     use WithFaker;
 
-    /** @var \Mockery\MockInterface|\ICSSegurancaLv\Services\BCryptServiceInterface $bcryptServico */
-    private MockInterface $bcryptServico;
+    /** @var \Mockery\MockInterface|\App\Repositories\UserRepositoryInterface $userRepository */
+    private MockInterface $userRepository;
+
+    /** @var \Illuminate\Database\Eloquent\Builder|\Mockery\LegacyMockInterface|\Mockery\MockInterface $eloquentBuilder */
+    private $eloquentBuilder;
 
     /**
      * @inheritDoc
@@ -31,78 +33,63 @@ class ValidacaoServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->bcryptServico = Mockery::mock(
-            BCryptService::class,
-            BCryptServiceInterface::class
+        $this->userRepository = Mockery::mock(
+            UserRepository::class,
+            UserRepositoryInterface::class
+        );
+        $this->eloquentBuilder = Mockery::mock(Builder::class);
+    }
+
+    /**
+     * @return \App\Services\UserService
+     */
+    public function getConcreteClass(): UserService
+    {
+        return new UserService(
+            $this->userRepository
         );
     }
 
     /**
-     * @return \ICSSegurancaLv\Services\Autenticacao\Mfa\Validacao\ValidacaoService
+     * @throws \Exception
      */
-    public function obterClasseConcreta()
-    {
-        return new ValidacaoService(
-            $this->bcryptServico
-        );
-    }
+//    public function testCreateUserSuccessfully(): void
+//    {
+//        $data = [
+//            'name' => $this->faker->name(),
+//            'cpf_cnpj' => $this->faker->numerify('###########'),
+//            'email' => $this->faker->unique()->safeEmail(),
+//            'password' => $this->faker->password(),
+//        ];
+//
+//        $this->userRepository->shouldReceive('getByCpfCnpjOrEmail')->once()
+//            ->with($data['cpf_cnpj'], $data['email'])->andReturn([]);
+//        $this->userRepository->shouldReceive('beginTransaction')->once();
+//        $this->userRepository->shouldReceive('create')->once()->andReturn($data);
+//        $this->userRepository->shouldReceive('commitTransaction')->once();
+//        $this->userRepository->shouldNotReceive('rollbackTransaction');
+//        $response = $this->getConcreteClass()->create($data);
+//
+//        $this->assertIsArray($response);
+//        $this->assertEquals($data, $response);
+//    }
 
-    public function testValidarEmailComEmailValido()
+    public function testFindUserByIdSuccessfully(): void
     {
-        $this->expectNotToPerformAssertions();
-        $this->obterClasseConcreta()->validarEmail('test@example.com');
-    }
-
-    public function testValidarEmailComEmailInvalido()
-    {
-        try {
-            $this->obterClasseConcreta()->validarEmail('invalidemail');
-            $this->fail('Exceção RuntimeException esperada.');
-        } catch (ICSHttpException $exception) {
-            $this->assertEquals(
-                StatusCodeInterface::STATUS_BAD_REQUEST,
-                $exception->getCode()
-            );
-        }
-    }
-
-    public function testIsMfaExpirada()
-    {
-        $this->assertFalse($this->obterClasseConcreta()->isMfaExpirada(['loginTimestamp' => time() - 100]));
-        $this->assertTrue($this->obterClasseConcreta()->isMfaExpirada(['loginTimestamp' => 0]));
-    }
-
-    public function testHasMfaPendente()
-    {
-        $funcionarioMfa = [
-            "funcionarioId" => "64333",
-            "codigo" => "196896",
-            "loginTimestamp" => "0",
-            "criacaoTimestamp" => "1714701627"
+        $userId = $this->faker->numberBetween(1, 10);
+        $data = [
+            'id' => $userId,
+            'name' => $this->faker->name(),
+            'cpf_cnpj' => $this->faker->numerify('###########'),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => $this->faker->password(),
         ];
-        $expiracaoSucesso = ['expiracaoTimestamp' => time() + 100];
-        $expiracaoErro = ['expiracaoTimestamp' => time() - 100];
-        $this->assertTrue(
-            $this->obterClasseConcreta()->hasMfaPendente(
-                array_merge($funcionarioMfa, $expiracaoSucesso)
-            )
-        );
-        $this->assertFalse(
-            $this->obterClasseConcreta()->hasMfaPendente(
-                array_merge($funcionarioMfa, $expiracaoErro)
-            )
-        );
-    }
 
-    public function testIsDominioTotalExpress()
-    {
-        $this->assertTrue($this->obterClasseConcreta()->isDominioTotalExpress('user@totalexpress.com'));
-        $this->assertFalse($this->obterClasseConcreta()->isDominioTotalExpress('user@example.com'));
-    }
+        $this->userRepository->shouldReceive('findById')->once()->with($userId)->andReturn($data);
 
-    public function testCanEnviarEmail()
-    {
-        $this->assertFalse($this->obterClasseConcreta()->canEnviarEmail('test@example.com'));
-        $this->assertTrue($this->obterClasseConcreta()->canEnviarEmail('user@totalexpress.com'));
+        $response = $this->getConcreteClass()->findById($userId);
+
+        $this->assertIsArray($response);
+        $this->assertEquals($data, $response);
     }
 }
