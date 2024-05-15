@@ -69,10 +69,10 @@ class UserServiceTest extends TestCase
             'password' => $this->faker->password(),
         ];
 
+        $this->userRepository->shouldReceive('beginTransaction')->once();
         $this->userModel->shouldReceive('toArray')->andReturn($data);
         $this->userRepository->shouldReceive('getByCpfCnpjOrEmail')->once()
             ->with($data['cpf_cnpj'], $data['email'])->andReturn([]);
-        $this->userRepository->shouldReceive('beginTransaction')->once();
         $this->eloquentBuilder->shouldReceive('create')->andReturn($this->eloquentBuilder);
         $this->eloquentBuilder->shouldReceive('toArray')->andReturn($this->eloquentBuilder);
         $this->userRepository->shouldReceive('create')->once()->andReturn($this->userModel);
