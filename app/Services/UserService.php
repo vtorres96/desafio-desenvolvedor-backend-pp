@@ -34,12 +34,12 @@ class UserService implements UserServiceInterface
     public function create(array $data): array
     {
         try {
-            $this->checkCpfAndEmailHasDuplicated($data);
-
-            $data = $this->applyHashPassword($data);
-
             $this->userRepository->beginTransaction();
+
+            $this->checkCpfAndEmailHasDuplicated($data);
+            $data = $this->applyHashPassword($data);
             $response = $this->userRepository->create($data)->toArray();
+
             $this->userRepository->commitTransaction();
         } catch (Exception $exception) {
             $this->userRepository->rollbackTransaction();
