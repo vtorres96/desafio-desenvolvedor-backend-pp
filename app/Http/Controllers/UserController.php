@@ -35,7 +35,7 @@ class UserController implements UserControllerInterface
     public function create(UserRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $response = $this->userService->update(8, $data);
+        $response = $this->userService->create($data);
 
         return response()->json(
             ['data' => $response],
